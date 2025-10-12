@@ -1,0 +1,11 @@
+venv
+__pycache__
+__pycache__
+.env
+email-job-backend/.env
+email-job-backend/.venv/
+.runtime/
+.kortex/
+attendees_list.csv
+emails
+logo.png

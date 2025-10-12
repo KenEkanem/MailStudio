@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WeGather Mail Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#"><span class="brand-mark">W</span><span>WeGather <b>Mail Studio</b></span></a>
+    <div class="api-state"><span id="healthDot"></span><span id="healthText">Checking service</span></div>
+  </header>
+
+  <main>
+    <section class="intro">
+      <div><p class="eyebrow">EMAIL CAMPAIGN</p><h1>Make every invitation feel personal.</h1>
+      <p>Design your event email, preview it live, then send it to your attendee list.</p></div>
+      <div class="step-pill"><span>1</span> Compose <i></i><span>2</span> Recipients <i></i><span>3</span> Send</div>
+    </section>
+
+    <div class="workspace">
+      <form id="campaignForm" class="composer">
+        <section class="panel">
+          <div class="panel-heading"><div><span class="number">01</span><h2>Message details</h2></div><span class="saved" id="saveState">Saved locally</span></div>
+          <div class="form-grid">
+            <label class="wide">Template name<input name="template_name" value="Registration confirmation" required></label>
+            <label>Event name<input name="event" value="WeGather Live" placeholder="Your event name" required></label>
+            <label>Subject<input name="subject" value="Registration confirmed for {{event}}" required></label>
+            <label class="wide">Preheader<input name="preheader" value="Your event registration is confirmed."></label>
+            <label>Heading<input name="heading" value="You're registered"></label>
+            <label>Accent<div class="color-control"><input type="color" name="accent" value="#635bff"><output>#635bff</output></div></label>
+          </div>
+
+          <div class="editor-label"><span>Message</span><small>Personalize with <button type="button" class="token" data-token="{{name}}">{{name}}</button> <button type="button" class="token" data-token="{{event}}">{{event}}</button></small></div>
+          <div class="editor-shell">
+            <div class="tabs"><button type="button" class="tab active" data-tab="visual">Rich text</button><button type="button" class="tab" data-tab="html">HTML</button></div>
+            <div id="visualPanel">
+              <div class="toolbar">
+                <button type="button" data-cmd="bold"><b>B</b></button><button type="button" data-cmd="italic"><i>I</i></button>
+                <button type="button" data-cmd="underline"><u>U</u></button><span></span><button type="button" data-cmd="insertUnorderedList">• List</button>
+                <button type="button" data-cmd="createLink">↗ Link</button>
+              </div>
+              <div id="richEditor" class="rich-editor" contenteditable="true"><p>Hello {{name}},</p><p>Your registration for {{event}} is confirmed. We look forward to welcoming you.</p></div>
+            </div>
+            <textarea id="htmlEditor" hidden spellcheck="false"></textarea>
+          </div>
+
+          <div class="form-grid lower">
+            <label>Button text<input name="button_text" value="View event"></label>
+            <label>Button URL<input name="button_url" type="url" placeholder="https://example.com/event"></label>
+            <label>Logo URL<input name="logo_url" type="url" placeholder="https://example.com/logo.png"></label>
+            <label>Upload custom logo<div class="file-compact"><input id="logo" name="logo" type="file" accept="image/png,image/jpeg,image/gif"><span id="logoName">PNG, JPG or GIF</span></div></label>
+            <label class="wide">Footer<input name="footer" value="WeGatherEvents · Event Operations"></label>
+          </div>
+        </section>
+
+        <section class="panel recipients-panel">
+          <div class="panel-heading"><div><span class="number">02</span><h2>Add recipients</h2></div></div>
+          <div class="csv-guide"><div class="csv-icon">CSV</div><div><strong>Prepare your attendee list</strong><p>Your CSV must use these exact column titles:</p><code>first_name</code><code>last_name</code><code>email</code></div></div>
+          <label id="dropzone" class="dropzone"><input id="csv" name="csv" type="file" accept=".csv" required><span class="upload-icon">↑</span><strong>Drop your CSV here or <u>browse</u></strong><small id="csvStatus">Maximum file size: 10 MB</small></label>
+          <div id="recipientPreview" class="recipient-preview" hidden></div>
+        </section>
+
+        <section class="panel send-panel">
+          <div class="panel-heading"><div><span class="number">03</span><h2>Test and send</h2></div></div>
+          <div class="test-row"><label>Test recipient email<input name="test_email" type="email" placeholder="you@example.com"></label><button id="testButton" type="button" class="button secondary">Send test</button></div>
+          <div class="send-row"><div><strong>Ready when you are</strong><p>We’ll personalize each message before delivery.</p></div><button id="sendButton" class="button primary" type="submit">Send campaign <span>→</span></button></div>
+          <div id="jobProgress" class="job-progress" hidden><div><span id="jobText">Preparing campaign…</span><strong id="jobCount">0 / 0</strong></div><progress id="progressBar" value="0" max="100"></progress></div>
+        </section>
+      </form>
+
+      <aside class="preview-column">
+        <div class="preview-header"><div><h2>Live preview</h2><span>Updates as you type</span></div><div class="device-tabs"><button class="active" data-width="desktop" type="button">▰</button><button data-width="mobile" type="button">▯</button></div></div>
+        <div class="email-frame"><div class="mail-meta"><span></span><span></span><span></span><small id="previewSubject"></small></div><iframe id="previewFrame" title="Email preview"></iframe></div>
+        <p class="preview-note">Preview uses “Jordan Lee” as the sample recipient.</p>
+      </aside>
+    </div>
+  </main>
+  <div id="toast" class="toast" role="status"></div>
+  <script src="app.js"></script>
+</body>
+</html>
