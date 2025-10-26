@@ -1,61 +1,131 @@
 # WeGather Mail Studio
 
-A separated frontend and Flask backend for composing personalized HTML event emails and sending them to attendees from a CSV file.
+WeGather Mail Studio is a web application for composing and sending personalized event emails to a CSV list of attendees.
 
-## Project layout
+It includes a rich-text editor, direct HTML editing, a live email preview, CSV validation, test emails, custom branding, and bulk-send progress tracking.
 
-- `emailjob-frontend/` — responsive HTML, CSS, and JavaScript interface with rich-text and HTML editor tabs, live preview, CSV validation, test delivery, and campaign progress.
-- `email-job-backend/` — Flask API for template rendering, CSV validation, SMTP delivery, and background email jobs.
+## Project structure
 
-The original one-off Python scripts remain in the repository for reference and have not been modified by this rebuild.
-
-## CSV format
-
-Use these exact, case-sensitive column titles:
-
-```csv
-first_name,last_name,email
-Jordan,Lee,jordan@example.com
+```text
+.
+├── email-job-backend/    # Flask API, email renderer, CSV validation, and SMTP jobs
+└── emailjob-frontend/    # Browser interface built with HTML, CSS, and JavaScript
 ```
 
-`first_name` and `last_name` are combined to replace `{{name}}`. The event name entered in the composer replaces `{{event}}`.
+## Features
 
-## Run locally
+- Rich-text and HTML editor tabs
+- Desktop and mobile email previews
+- `{{first_name}}`, `{{name}}`, and `{{event}}` personalization
+- CSV recipient validation
+- Custom accent color, logo, button, preheader, and footer
+- Test-email delivery before starting a campaign
+- Background bulk-email processing with progress reporting
+- SMTP credentials stored outside source control
 
-Open two PowerShell terminals from this repository.
+## Requirements
 
-Backend:
+- Python 3.10 or newer
+- Access to an SMTP email account
+
+## Setup
+
+Clone the repository and open a terminal in its root directory.
+
+### 1. Configure the backend
 
 ```powershell
 cd email-job-backend
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 Copy-Item .env.example .env
-# Edit .env with real SMTP credentials
-python app.py
 ```
 
-Frontend:
+Open `email-job-backend/.env` and enter your SMTP settings:
 
-```powershell
-cd emailjob-frontend
-python -m http.server 5173
+```env
+SMTP_SERVER=smtp.example.com
+SMTP_PORT=465
+SMTP_USER=mailer@example.com
+SMTP_PASSWORD=replace-me
+SMTP_FROM=WeGatherEvents <mailer@example.com>
+FRONTEND_ORIGIN=http://localhost:5265
+PORT=5000
+FLASK_DEBUG=0
 ```
 
-Then open `http://localhost:5173`. By default, the frontend calls `http://localhost:5000/api`.
+The `.env` file is ignored by Git and should never be committed.
 
-SMTP configuration lives in `email-job-backend/.env`. This file is ignored by Git so credentials are not committed.
+## Start the application
 
-## Test
+The backend and frontend run in separate terminals.
 
-No real email is sent by the automated tests:
+### Terminal 1 — backend
 
 ```powershell
 cd email-job-backend
+.\.venv\Scripts\Activate.ps1
+python app.py
+```
+
+The API will be available at `http://localhost:5000/api`.
+
+### Terminal 2 — frontend
+
+From the repository root:
+
+```powershell
+cd emailjob-frontend
+python -m http.server 5265
+```
+
+Open [http://localhost:5265](http://localhost:5265) in your browser.
+
+## Recipient CSV format
+
+Upload a UTF-8 CSV file containing these exact, case-sensitive column titles:
+
+```csv
+first_name,last_name,email
+Jordan,Lee,jordan@example.com
+Ada,Lovelace,ada@example.com
+```
+
+The backend uses `first_name` for `{{first_name}}` and combines `first_name` with `last_name` for `{{name}}`. Rows with invalid email addresses are skipped and reported by the interface.
+
+A ready-to-copy example is available at `email-job-backend/sample-attendees.csv`.
+
+## Personalization
+
+The following placeholders can be used in the subject and message:
+
+| Placeholder | Value |
+| --- | --- |
+| `{{first_name}}` | Recipient's first name |
+| `{{name}}` | Recipient's combined first and last name |
+| `{{event}}` | Event name entered in the campaign form |
+
+Example:
+
+```text
+Hello {{first_name}},
+
+Your registration for {{event}} is confirmed.
+```
+
+Use **Send test** to verify the rendered email before sending the campaign to the uploaded CSV list.
+
+## Run tests
+
+Backend tests do not send real emails:
+
+```powershell
+cd email-job-backend
+.\.venv\Scripts\Activate.ps1
 python -m unittest -v
 ```
 
-## Production notes
+## Deployment note
 
-The in-memory background job store is suitable for a single-process deployment. For multiple workers or durable job history, replace it with Celery/RQ plus Redis and store campaign results in a database. Restrict `FRONTEND_ORIGIN`, run behind HTTPS, and keep SMTP credentials outside version control.
+Campaign state is currently kept in memory and is intended for a single Flask process. A production deployment that requires multiple workers or durable job history should use a persistent database and a task queue such as Celery or RQ.
