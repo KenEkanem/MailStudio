@@ -25,20 +25,23 @@ JOBS = {}
 JOBS_LOCK = threading.Lock()
 REQUIRED_COLUMNS = {"first_name", "last_name", "email"}
 EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
-TOKEN_RE = re.compile(r"{{\s*(name|event)\s*}}", re.IGNORECASE)
+TOKEN_RE = re.compile(r"{{\s*(first_name|name|event)\s*}}", re.IGNORECASE)
 
 DEFAULT_TEMPLATE = {
-    "template_name": "Registration confirmation",
+    "template_name": "Vibezone welcome",
     "event": "",
     "subject": "Registration confirmed for {{event}}",
     "preheader": "Your event registration is confirmed.",
-    "heading": "You're registered",
+    "heading": "THANKS",
     "message_html": (
-        "<p>Hello {{name}},</p><p>Your registration for {{event}} is confirmed. "
-        "We look forward to welcoming you.</p>"
+        "<p>Hello {{first_name}},</p>"
+        "<p>We are delighted to have you with us and appreciate the time you took to register.</p>"
+        "<p>We look forward to welcoming you and hope you have a memorable experience.</p>"
+        "<p>If you have any questions or need additional information, please don't hesitate to contact us.</p>"
+        "<p>See you soon!</p><p>Kind regards,<br>The Vibezone</p>"
     ),
-    "button_text": "View event",
-    "accent": "#635bff",
+    "button_text": "Get started",
+    "accent": "#3046d3",
     "button_url": "",
     "logo_url": "",
     "footer": "WeGatherEvents · Event Operations",
@@ -73,33 +76,37 @@ def validate_logo(logo):
     return data, logo.mimetype
 
 
-def personalize(value, name, event):
-    replacements = {"name": name, "event": event}
+def personalize(value, name, event, first_name=None):
+    replacements = {"name": name, "first_name": first_name or name.split()[0], "event": event}
     return TOKEN_RE.sub(lambda match: replacements[match.group(1).lower()], value or "")
 
 
-def render_email(template, name="Jordan Lee"):
+def render_email(template, name="Jordan Lee", first_name=None):
     template = {**DEFAULT_TEMPLATE, **template}
     event = template.get("event", "") or "Your event"
-    values = {key: personalize(str(value), name, event) for key, value in template.items()}
+    values = {key: personalize(str(value), name, event, first_name) for key, value in template.items()}
     accent = values["accent"] if re.fullmatch(r"#[0-9a-fA-F]{6}", values["accent"]) else "#635bff"
     logo = ""
     if values["logo_url"]:
         logo = f'<img src="{values["logo_url"]}" alt="Logo" style="max-height:48px;max-width:180px;margin-bottom:28px">'
     button = ""
-    if values["button_text"] and values["button_url"]:
+    if values["button_text"]:
+        button_url = values["button_url"] or "#"
         button = (
-            f'<p style="margin:30px 0"><a href="{values["button_url"]}" '
-            f'style="background:{accent};color:#fff;text-decoration:none;padding:13px 22px;'
-            f'border-radius:7px;font-weight:700;display:inline-block">{values["button_text"]}</a></p>'
+            f'<p style="margin:30px 0"><a href="{button_url}" '
+            f'style="background:{accent};color:#fff;text-decoration:none;padding:14px 46px;'
+            f'border-radius:4px;font-weight:700;display:inline-block">{values["button_text"]}</a></p>'
         )
-    html = f'''<!doctype html><html><body style="margin:0;background:#f5f6fa;font-family:Arial,sans-serif;color:#252735">
+    html = f'''<!doctype html><html><body style="margin:0;background:#f1f1f1;font-family:Arial,sans-serif;color:#353535">
     <div style="display:none;max-height:0;overflow:hidden">{values['preheader']}</div>
-    <div style="max-width:620px;margin:32px auto;background:#fff;border-radius:12px;overflow:hidden">
-      <div style="height:7px;background:{accent}"></div><div style="padding:42px">{logo}
-      <h1 style="font-size:30px;margin:0 0 22px">{values['heading']}</h1>
-      <div style="font-size:16px;line-height:1.7">{values['message_html']}</div>{button}</div>
-      <div style="padding:22px 42px;background:#f1f2f6;color:#747789;font-size:13px">{values['footer']}</div>
+    <div style="max-width:620px;margin:24px auto;background:#fff;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.08)">
+      <div style="background:{accent};color:#fff;text-align:center;padding:46px 30px 38px">{logo}
+        <h1 style="font-size:54px;line-height:1;margin:10px 0 5px;letter-spacing:1px">{values['heading']}</h1>
+        <div style="font-size:25px">for joining us!</div>
+      </div>
+      <div style="padding:38px 44px 28px"><div style="font-size:16px;line-height:1.65">{values['message_html']}</div>
+      <div style="text-align:center">{button}</div></div>
+      <div style="padding:20px 42px;text-align:center;color:#747789;font-size:13px">{values['footer']}</div>
     </div></body></html>'''
     return values["subject"], html
 
@@ -122,7 +129,7 @@ def parse_csv(file_storage):
         if not EMAIL_RE.match(email):
             errors.append(f"Row {line}: invalid email address.")
             continue
-        recipients.append({"name": " ".join(part for part in (first, last) if part) or "Guest", "email": email})
+        recipients.append({"first_name": first or "Guest", "name": " ".join(part for part in (first, last) if part) or "Guest", "email": email})
     if not recipients:
         raise ValueError("The CSV does not contain any valid recipients.")
     return recipients, errors
@@ -144,7 +151,7 @@ def send_message(recipient, template, logo_data=None, logo_type=None):
     password = os.getenv("SMTP_PASSWORD")
     if not all((server_name, username, password)):
         raise RuntimeError("SMTP_SERVER, SMTP_USER, and SMTP_PASSWORD must be configured.")
-    subject, html = render_email(template, recipient["name"])
+    subject, html = render_email(template, recipient["name"], recipient.get("first_name"))
     if logo_data:
         html = html.replace(template.get("logo_url", ""), "cid:custom-logo") if template.get("logo_url") else html.replace(
             '<h1 style="font-size:30px', '<img src="cid:custom-logo" alt="Logo" style="max-height:48px;max-width:180px;margin-bottom:28px"><h1 style="font-size:30px'

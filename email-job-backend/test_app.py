@@ -11,6 +11,7 @@ class EmailJobTests(unittest.TestCase):
 
     def test_personalization(self):
         self.assertEqual(personalize("Hi {{name}} — {{ event }}", "Ada Lovelace", "Python Day"), "Hi Ada Lovelace — Python Day")
+        self.assertEqual(personalize("Hello {{first_name}}", "Ada Lovelace", "Python Day", "Ada"), "Hello Ada")
 
     def test_rendered_email_contains_content(self):
         subject, html = render_email({"event": "Summit", "subject": "Welcome to {{event}}", "message_html": "Hello {{name}}"}, "Grace Hopper")
@@ -23,6 +24,7 @@ class EmailJobTests(unittest.TestCase):
         }, content_type="multipart/form-data")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.get_json()["count"], 1)
+        self.assertEqual(response.get_json()["sample"][0]["first_name"], "Ada")
 
     def test_csv_requires_exact_columns(self):
         response = self.client.post("/api/recipients/validate", data={
