@@ -17,8 +17,8 @@
 
   <main>
     <section class="intro">
-      <div><p class="eyebrow">EMAIL CAMPAIGN</p><h1>Make every invitation feel personal.</h1>
-      <p>Design your event email, preview it live, then send it to your attendee list.</p></div>
+      <div><p class="eyebrow">EMAIL CAMPAIGN</p><h1>Make every invitation feel personal</h1>
+      <p>Design your email, preview it live, then send it to your list/contacts.</p></div>
       <div class="step-pill"><span>1</span> Compose <i></i><span>2</span> Recipients <i></i><span>3</span> Send</div>
     </section>
 
@@ -27,15 +27,15 @@
         <section class="panel">
           <div class="panel-heading"><div><span class="number">01</span><h2>Message details</h2></div><span class="saved" id="saveState">Saved locally</span></div>
           <div class="form-grid">
-            <label class="wide">Template name<input name="template_name" value="Registration confirmation" required></label>
+            <label class="wide">Template name<input name="template_name" value="Vibezone welcome" required></label>
             <label>Event name<input name="event" value="WeGather Live" placeholder="Your event name" required></label>
             <label>Subject<input name="subject" value="Registration confirmed for {{event}}" required></label>
             <label class="wide">Preheader<input name="preheader" value="Your event registration is confirmed."></label>
-            <label>Heading<input name="heading" value="You're registered"></label>
-            <label>Accent<div class="color-control"><input type="color" name="accent" value="#635bff"><output>#635bff</output></div></label>
+            <label>Heading<input name="heading" value="THANKS"></label>
+            <label>Accent<div class="color-control"><input type="color" name="accent" value="#3046d3"><output>#3046d3</output></div></label>
           </div>
 
-          <div class="editor-label"><span>Message</span><small>Personalize with <button type="button" class="token" data-token="{{name}}">{{name}}</button> <button type="button" class="token" data-token="{{event}}">{{event}}</button></small></div>
+          <div class="editor-label"><span>Message</span><small>Personalize with <button type="button" class="token" data-token="{{first_name}}">{{first_name}}</button> <button type="button" class="token" data-token="{{name}}">{{name}}</button> <button type="button" class="token" data-token="{{event}}">{{event}}</button></small></div>
           <div class="editor-shell">
             <div class="tabs"><button type="button" class="tab active" data-tab="visual">Rich text</button><button type="button" class="tab" data-tab="html">HTML</button></div>
             <div id="visualPanel">
@@ -44,13 +44,13 @@
                 <button type="button" data-cmd="underline"><u>U</u></button><span></span><button type="button" data-cmd="insertUnorderedList">• List</button>
                 <button type="button" data-cmd="createLink">↗ Link</button>
               </div>
-              <div id="richEditor" class="rich-editor" contenteditable="true"><p>Hello {{name}},</p><p>Your registration for {{event}} is confirmed. We look forward to welcoming you.</p></div>
+              <div id="richEditor" class="rich-editor" contenteditable="true"><p>Hello {{first_name}},</p><p>We are delighted to have you with us and appreciate the time you took to register.</p><p>We look forward to welcoming you and hope you have a memorable experience.</p><p>If you have any questions or need additional information, please don't hesitate to contact us.</p><p>See you soon!</p><p>Kind regards,<br>The Vibezone</p></div>
             </div>
             <textarea id="htmlEditor" hidden spellcheck="false"></textarea>
           </div>
 
           <div class="form-grid lower">
-            <label>Button text<input name="button_text" value="View event"></label>
+            <label>Button text<input name="button_text" value="Get started"></label>
             <label>Button URL<input name="button_url" type="url" placeholder="https://example.com/event"></label>
             <label>Logo URL<input name="logo_url" type="url" placeholder="https://example.com/logo.png"></label>
             <label>Upload custom logo<div class="file-compact"><input id="logo" name="logo" type="file" accept="image/png,image/jpeg,image/gif"><span id="logoName">PNG, JPG or GIF</span></div></label>
@@ -75,8 +75,13 @@
 
       <aside class="preview-column">
         <div class="preview-header"><div><h2>Live preview</h2><span>Updates as you type</span></div><div class="device-tabs"><button class="active" data-width="desktop" type="button">▰</button><button data-width="mobile" type="button">▯</button></div></div>
+        <label class="preview-as">Preview as
+          <select id="previewRecipient" disabled>
+            <option value="Jordan Lee">Jordan Lee (sample)</option>
+          </select>
+        </label>
         <div class="email-frame"><div class="mail-meta"><span></span><span></span><span></span><small id="previewSubject"></small></div><iframe id="previewFrame" title="Email preview"></iframe></div>
-        <p class="preview-note">Preview uses “Jordan Lee” as the sample recipient.</p>
+        <p class="preview-note" id="previewNote">Upload a CSV to preview as one of its first five recipients.</p>
       </aside>
     </div>
   </main>

@@ -14,6 +14,7 @@ function toast(message, error = false) {
 function payload(includeFiles = false) {
   const data = new FormData(form);
   data.set('message_html', rich.innerHTML);
+  data.set('preview_name', document.querySelector('#previewRecipient').value);
   if (!includeFiles) { data.delete('csv'); data.delete('logo'); }
   return data;
 }
@@ -77,7 +78,21 @@ document.querySelector('#csv').addEventListener('change', async event => {
     document.querySelector('#csvStatus').textContent = `${file.name} · ${result.count} valid recipient${result.count === 1 ? '' : 's'}`;
     const preview = document.querySelector('#recipientPreview'); preview.hidden = false;
     preview.textContent = `✓ ${result.count} ready to send${result.errors.length ? ` · ${result.errors.length} row(s) will be skipped` : ''}`;
+    const selector = document.querySelector('#previewRecipient');
+    selector.innerHTML = result.sample.map(person => `<option value="${escapeHtml(person.name)}">${escapeHtml(person.name)} · ${escapeHtml(person.email)}</option>`).join('');
+    selector.disabled = false;
+    document.querySelector('#previewNote').textContent = `Previewing the first of ${Math.min(result.count, 5)} available sample recipients.`;
+    queuePreview();
   } catch (error) { document.querySelector('#csvStatus').textContent = error.message; toast(error.message, true); }
+});
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>'"]/g, character => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[character]));
+}
+
+document.querySelector('#previewRecipient').addEventListener('change', () => {
+  document.querySelector('#previewNote').textContent = `Previewing as ${document.querySelector('#previewRecipient').value}.`;
+  queuePreview();
 });
 
 document.querySelector('#testButton').addEventListener('click', async event => {
