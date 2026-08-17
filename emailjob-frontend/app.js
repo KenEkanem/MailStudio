@@ -1,4 +1,4 @@
-const API = localStorage.getItem('emailJobApi') || 'http://localhost:5000/api';
+const API = localStorage.getItem('emailJobApi') || `http://${window.location.hostname}:5000/api`;
 const form = document.querySelector('#campaignForm');
 const rich = document.querySelector('#richEditor');
 const htmlEditor = document.querySelector('#htmlEditor');
