@@ -28,59 +28,12 @@ It includes a rich-text editor, direct HTML editing, a live email preview, CSV v
 - Python 3.10 or newer
 - Access to an SMTP email account
 
-## Setup
+## Setup and running
 
-Clone the repository and open a terminal in its root directory.
-
-### 1. Configure the backend
-
-```powershell
-cd email-job-backend
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
-Copy-Item .env.example .env
-```
-
-Open `email-job-backend/.env` and enter your SMTP settings:
-
-```env
-SMTP_SERVER=smtp.example.com
-SMTP_PORT=465
-SMTP_USER=mailer@example.com
-SMTP_PASSWORD=replace-me
-SMTP_FROM=WeGatherEvents <mailer@example.com>
-FRONTEND_ORIGIN=http://localhost:5265
-PORT=5000
-FLASK_DEBUG=0
-```
+See [startup.md](startup.md) for backend configuration, starting the
+backend and frontend, and running on the LAN.
 
 The `.env` file is ignored by Git and should never be committed.
-
-## Start the application
-
-The backend and frontend run in separate terminals.
-
-### Terminal 1 — backend
-
-```powershell
-cd email-job-backend
-.\.venv\Scripts\Activate.ps1
-python app.py
-```
-
-The API will be available at `http://localhost:5000/api`.
-
-### Terminal 2 — frontend
-
-From the repository root:
-
-```powershell
-cd emailjob-frontend
-python -m http.server 5265
-```
-
-Open [http://localhost:5265](http://localhost:5265) in your browser.
 
 ## Recipient CSV format
 
@@ -118,13 +71,8 @@ Use **Send test** to verify the rendered email before sending the campaign to th
 
 ## Run tests
 
-Backend tests do not send real emails:
-
-```powershell
-cd email-job-backend
-.\.venv\Scripts\Activate.ps1
-python -m unittest -v
-```
+Backend tests do not send real emails. See [startup.md](startup.md) for
+the commands.
 
 ## Deployment note
 
